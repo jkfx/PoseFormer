@@ -150,14 +150,8 @@ def render_animation(keypoints, keypoints_metadata, poses, skeleton, fps, bitrat
         nonlocal initialized, image, lines, points
 
         for n, ax in enumerate(ax_3d):
-            x_val = trajectories[n][i,0]
-            x_center = x_val.item() if isinstance(x_val, np.ndarray) else x_val
-            z_val = trajectories[n][i,2]
-            z_center = z_val.item() if isinstance(z_val, np.ndarray) else z_val
-            ax.set_xlim3d([-radius/2 + x_center, radius/2 + x_center])
-            ax.set_zlim3d([-radius/2 + z_center, radius/2 + z_center])
-            #ax.set_xlim3d([-radius / 2 + trajectories[n][i, 0], radius / 2 + trajectories[n][i, 0]])
-            #ax.set_ylim3d([-radius / 2 + trajectories[n][i, 1], radius / 2 + trajectories[n][i, 1]])
+            ax.set_xlim3d([-radius / 2 + trajectories[n][i, 0], radius / 2 + trajectories[n][i, 0]])
+            ax.set_ylim3d([-radius / 2 + trajectories[n][i, 1], radius / 2 + trajectories[n][i, 1]])
 
         # Update 2D poses
         joints_right_2d = keypoints_metadata['keypoints_symmetry'][1]
