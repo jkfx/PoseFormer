@@ -104,7 +104,11 @@ def render_animation(keypoints, keypoints_metadata, poses, skeleton, fps, bitrat
         ax.set_title(title)  # , pad=35
         ax_3d.append(ax)
         lines_3d.append([])
-        trajectories.append(data[:, 0, [0, 1]])
+        #trajectories.append(data[:, 0, [0, 1]])
+        traj = data[:, 0, [0, 1]].squeeze()  # 确保二维结构
+        assert traj.ndim == 2, "轨迹数据维度异常"
+        trajectories.append(traj)
+        
     poses = list(poses.values())
 
     # Decode video
@@ -150,8 +154,24 @@ def render_animation(keypoints, keypoints_metadata, poses, skeleton, fps, bitrat
         nonlocal initialized, image, lines, points
 
         for n, ax in enumerate(ax_3d):
-            ax.set_xlim3d([-radius / 2 + trajectories[n][i, 0], radius / 2 + trajectories[n][i, 0]])
-            ax.set_ylim3d([-radius / 2 + trajectories[n][i, 1], radius / 2 + trajectories[n][i, 1]])
+            # 获取坐标值
+            x_val = trajectories[n][i, 0]
+            z_val = trajectories[n][i, 1]  # 轨迹数据存储的是(x,y)
+            if isinstance(x_val, np.ndarray):
+                if x_val.size != 1:
+                    print(f"警告: 轨迹{n}第{i}帧x坐标包含多个值，取第一个")
+                x_center = x_val.flat[0]  # 取第一个元素
+            else:
+                x_center = x_val
+            if isinstance(z_val, np.ndarray):
+                z_center = z_val.flat[0]
+            else:
+                z_center = z_val
+            ax.set_xlim3d([-radius/2 + x_center, radius/2 + x_center])
+            ax.set_zlim3d([-radius/2 + z_center, radius/2 + z_center])
+
+            #ax.set_xlim3d([-radius / 2 + trajectories[n][i, 0], radius / 2 + trajectories[n][i, 0]])
+            #ax.set_ylim3d([-radius / 2 + trajectories[n][i, 1], radius / 2 + trajectories[n][i, 1]])
 
         # Update 2D poses
         joints_right_2d = keypoints_metadata['keypoints_symmetry'][1]
