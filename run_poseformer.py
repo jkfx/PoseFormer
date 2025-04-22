@@ -508,7 +508,12 @@ def evaluate(test_generator, action=None, return_predictions=False, use_trajecto
         N = 0
         for _, batch, batch_2d in test_generator.next_epoch():
             inputs_2d = torch.from_numpy(batch_2d.astype('float32'))
-            inputs_3d = torch.from_numpy(batch.astype('float32'))
+            # 空数据检查
+            if batch is None:
+                print('WARNING: Empty batch detected, using dummy data')
+                inputs_3d = torch.zeros_like(torch.from_numpy(batch_2d[..., :3]))  # 保持维度一致
+            else:
+                inputs_3d = torch.from_numpy(batch.astype('float32'))
 
 
             ##### apply test-time-augmentation (following Videopose3d)
@@ -582,8 +587,13 @@ if args.render:
             ground_truth = dataset[args.viz_subject][args.viz_action]['positions_3d'][args.viz_camera].copy()
     if ground_truth is None:
         print('INFO: this action is unlabeled. Ground truth will not be rendered.')
+        # 创建伪3D数据
+        dummy_3d = np.zeros((len(input_keypoints), 17, 3), dtype=np.float32)
+        valid_3d = [dummy_3d]
+    else:
+        valid_3d = [ground_truth]
 
-    gen = UnchunkedGenerator(None, ground_truth, [input_keypoints],
+    gen = UnchunkedGenerator(None, valid_3d, [input_keypoints],
                              pad=pad, causal_shift=causal_shift, augment=args.test_time_augmentation,
                              kps_left=kps_left, kps_right=kps_right, joints_left=joints_left, joints_right=joints_right)
     prediction = evaluate(gen, return_predictions=True)
