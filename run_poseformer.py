@@ -583,7 +583,7 @@ if args.render:
     if ground_truth is None:
         print('INFO: this action is unlabeled. Ground truth will not be rendered.')
 
-    gen = UnchunkedGenerator(None, [ground_truth], [input_keypoints],
+    gen = UnchunkedGenerator(None, ground_truth, [input_keypoints],
                              pad=pad, causal_shift=causal_shift, augment=args.test_time_augmentation,
                              kps_left=kps_left, kps_right=kps_right, joints_left=joints_left, joints_right=joints_right)
     prediction = evaluate(gen, return_predictions=True)
